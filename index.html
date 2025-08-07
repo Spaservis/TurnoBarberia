@@ -21,28 +21,63 @@
       text-decoration: underline;
       cursor: pointer;
     }
+    /* Estilos del catálogo */
+    .catalogo {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      padding: 20px;
+    }
+    .producto {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    .producto:hover { transform: scale(1.03); }
+    .producto img {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .producto h3 {
+      margin: 10px 0 5px;
+      font-size: 1.2em;
+    }
+    .producto .precio {
+      font-weight: bold;
+      color: #28a745;
+      margin: 10px 0;
+    }
+    .producto input,
+    .producto select {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .producto button {
+      width: 100%;
+      padding: 10px;
+      background: #28a745;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .producto button:hover {
+      background: #218838;
+    }
   </style>
 </head>
 <body>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Asignación de Turnos</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    label { display: block; margin-top: 10px; }
-    input, select, textarea, button { width: 100%; padding: 8px; margin-top: 5px; }
-    #turnosDisponibles { margin-top: 20px; }
-    button.admin { background-color: #f44336; color: white; margin-top: 20px; }
-  </style>
-</head>
-<body>
   <h2>Formulario para Apartar Turno</h2>
-<br>
-  
- <br>
+
   <form id="formularioTurno">
     <label>Nombre:
       <input type="text" id="nombre" required>
@@ -68,31 +103,31 @@
 
   <button class="admin" type="button" onclick="limpiarHistorial()">🧹 Limpiar Historial (Admin)</button>
 
-  <script>
-    const horarios = [
-      "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-      "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM",
-      "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM",
-      "09:00 PM", "10:00 PM"
-    ];
+  <a href="#" id="enlace-ver-mas">Ver más</a>
 
+  <div id="contenido-oculto">
+    <h1>Catálogo de Productos</h1>
+    <div class="catalogo" id="catalogo"></div>
+  </div>
+
+  <script>
+    // TURNOS
+    const horarios = ["09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM"];
     const CONTRASENA_ADMIN = "admin123";
     let turnosTomados = JSON.parse(localStorage.getItem("turnos")) || [];
 
     function actualizarTurnos() {
-      const turnosDisponibles = horarios.filter(h => !turnosTomados.some(t => t.turno === h));
       const select = document.getElementById("turno");
       const lista = document.getElementById("turnosDisponibles");
+      const disponibles = horarios.filter(h => !turnosTomados.some(t => t.turno === h));
 
       select.innerHTML = "";
       lista.innerHTML = "";
 
-      if (turnosDisponibles.length === 0) {
-        let aviso = document.createElement("li");
-        aviso.textContent = "🚫 No hay turnos disponibles por ahora.";
-        lista.appendChild(aviso);
+      if (disponibles.length === 0) {
+        lista.innerHTML = "<li>🚫 No hay turnos disponibles por ahora.</li>";
       } else {
-        turnosDisponibles.forEach(turno => {
+        disponibles.forEach(turno => {
           let option = document.createElement("option");
           option.value = turno;
           option.textContent = turno;
@@ -111,30 +146,22 @@
 
     document.getElementById("formularioTurno").addEventListener("submit", function(e) {
       e.preventDefault();
-
       const nombre = document.getElementById("nombre").value;
       const telefono = document.getElementById("telefono").value;
       const observacion = document.getElementById("observacion").value;
       const turno = document.getElementById("turno").value;
-      const fotoInput = document.getElementById("foto");
-      const foto = fotoInput.files.length > 0 ? fotoInput.files[0].name : "";
+      const foto = document.getElementById("foto").files[0]?.name || "";
 
       const nuevoTurno = { nombre, telefono, observacion, turno, foto };
       turnosTomados.push(nuevoTurno);
       localStorage.setItem("turnos", JSON.stringify(turnosTomados));
 
       const mensaje = `📢 Se ha apartado un turno:\n🕒 Turno: ${turno}\n👤 Nombre: ${nombre}\n📞 Tel: ${telefono}`;
-      const numeroWhatsApp = "573043537850";
-      const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+      const url = `https://wa.me/573043537850?text=${encodeURIComponent(mensaje)}`;
       window.open(url, "_blank");
 
       alert("✅ Turno reservado correctamente.");
       limpiarCampos();
-
-      if (turnosTomados.length >= horarios.length) {
-        alert("⚠️ Todos los turnos han sido tomados. Solo un administrador puede reiniciarlos.");
-      }
-
       actualizarTurnos();
     });
 
@@ -144,7 +171,7 @@
         if (confirm("¿Está seguro de limpiar todos los turnos y reiniciar la lista?")) {
           localStorage.removeItem("turnos");
           turnosTomados = [];
-          alert("✅ Historial limpiado. Todos los turnos están disponibles nuevamente.");
+          alert("✅ Historial limpiado.");
           actualizarTurnos();
         }
       } else {
@@ -152,115 +179,20 @@
       }
     }
 
-    actualizarTurnos();
-  </script>
-</body>
-</html>
+    // VER MÁS
+    document.getElementById("enlace-ver-mas").addEventListener("click", function(e) {
+      e.preventDefault();
+      const contenido = document.getElementById("contenido-oculto");
+      if (contenido.style.display === "none" || contenido.style.display === "") {
+        contenido.style.display = "block";
+        this.textContent = "Ver menos";
+      } else {
+        contenido.style.display = "none";
+        this.textContent = "Ver más";
+      }
+    });
 
-
-  <a href="#" id="enlace-ver-mas">Ver más</a>
-
-  <div id="contenido-oculto">
-    <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Tienda en Línea - Belleza y Estética</title>
-  <style>
-
-<br>
-  <a href="gel.html">⬅️ Tienda de Belleza, ir a los productos</a>
- <br>
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 30px;
-      background: linear-gradient(to right, #fdfbfb, #ebedee);
-      color: #332;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    .catalogo {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 30px;
-      padding: 20px;
-    }
-
-    .producto {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
-    }
-
-    .producto:hover {
-      transform: scale(1.03);
-    }
-
-    .producto img {
-      width: 100%;
-      border-radius: 8px;
-    }
-
-    .producto h3 {
-      margin: 10px 0 5px;
-      font-size: 1.2em;
-    }
-
-    .producto p {
-      font-size: 0.95em;
-      color: #555;
-    }
-
-    .producto .precio {
-      font-weight: bold;
-      color: #28a745;
-      margin: 10px 0;
-    }
-
-    .producto input,
-    .producto select {
-      width: 100%;
-      padding: 8px;
-      margin: 6px 0;
-      font-size: 1em;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    .producto button {
-      width: 100%;
-      padding: 10px;
-      background: #28a745;
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .producto button:hover {
-      background: #218838;
-    }
-  </style>
-</head>
-<body>
- <br>
-  <a href=""</a>
-
-  <h1>Catálogo de Productos</h1>
-
-  <div class="catalogo" id="catalogo">
-    <!-- Productos se insertan aquí con JS -->
-  </div>
-
-  <script>
+    // CATÁLOGO
     const productos = [
       {
         nombre: "Pantalon pijama niño",
@@ -283,44 +215,41 @@
     ];
 
     const catalogo = document.getElementById("catalogo");
-
-    productos.forEach((producto, index) => {
+    productos.forEach((p, i) => {
       const div = document.createElement("div");
       div.className = "producto";
       div.innerHTML = `
-        <img src="${producto.imagen}" alt="${producto.nombre}">
-        <h3>${producto.nombre}</h3>
-        <p>${producto.descripcion}</p>
-        <div class="precio">Precio: $${producto.precio.toLocaleString('es-CO')}</div>
-
-        <input type="number" min="1" value="1" id="cantidad-${index}" placeholder="Cantidad">
-        <input type="text" placeholder="Tu nombre" id="nombre-${index}">
-        <input type="tel" placeholder="WhatsApp" id="telefono-${index}">
-        <input type="text" placeholder="Dirección de envío" id="direccion-${index}">
-        <select id="pago-${index}">
+        <img src="${p.imagen}" alt="${p.nombre}">
+        <h3>${p.nombre}</h3>
+        <p>${p.descripcion}</p>
+        <div class="precio">Precio: $${p.precio.toLocaleString()}</div>
+        <input type="number" min="1" value="1" id="cantidad-${i}">
+        <input type="text" placeholder="Tu nombre" id="nombre-${i}">
+        <input type="tel" placeholder="WhatsApp" id="telefono-${i}">
+        <input type="text" placeholder="Dirección de envío" id="direccion-${i}">
+        <select id="pago-${i}">
           <option value="Nequi">Nequi</option>
           <option value="Daviplata">Daviplata</option>
           <option value="Tarjeta">Tarjeta</option>
         </select>
-
-        <button onclick="comprar(${index})">Comprar por WhatsApp</button>
+        <button onclick="comprar(${i})">Comprar por WhatsApp</button>
       `;
       catalogo.appendChild(div);
     });
 
-    function comprar(index) {
-      const cantidad = document.getElementById(`cantidad-${index}`).value;
-      const nombre = document.getElementById(`nombre-${index}`).value.trim();
-      const telefono = document.getElementById(`telefono-${index}`).value.trim();
-      const direccion = document.getElementById(`direccion-${index}`).value.trim();
-      const pago = document.getElementById(`pago-${index}`).value;
+    function comprar(i) {
+      const cantidad = document.getElementById(`cantidad-${i}`).value;
+      const nombre = document.getElementById(`nombre-${i}`).value.trim();
+      const telefono = document.getElementById(`telefono-${i}`).value.trim();
+      const direccion = document.getElementById(`direccion-${i}`).value.trim();
+      const pago = document.getElementById(`pago-${i}`).value;
 
       if (!nombre || !telefono || !direccion || cantidad < 1) {
         alert("Completa todos los campos correctamente.");
         return;
       }
 
-      const producto = productos[index];
+      const producto = productos[i];
       const total = producto.precio * cantidad;
 
       const mensaje = `Hola, quiero comprar ${cantidad} unidad(es) de ${producto.nombre}.
@@ -328,33 +257,15 @@ Nombre: ${nombre}
 Teléfono: ${telefono}
 Dirección: ${direccion}
 Método de pago: ${pago}
-Total: $${total.toLocaleString('es-CO')} COP`;
+Total: $${total.toLocaleString()} COP`;
 
       const whatsapp = `https://wa.me/573043537850?text=${encodeURIComponent(mensaje)}`;
       window.open(whatsapp, "_blank");
     }
+
+    actualizarTurnos();
   </script>
 </body>
 </html>
 
-  </div>
-
-  <script>
-    const enlace = document.getElementById('enlace-ver-mas');
-    const contenido = document.getElementById('contenido-oculto');
-
-    enlace.addEventListener('click', function(e) {
-      e.preventDefault(); // Evita que la página se desplace al principio
-      if (contenido.style.display === 'none' || contenido.style.display === '') {
-        contenido.style.display = 'block';
-        enlace.textContent = 'Ver menos';
-      } else {
-        contenido.style.display = 'none';
-        enlace.textContent = 'Ver más';
-      }
-    });
-  </script>
-
-</body>
-</html>
 
