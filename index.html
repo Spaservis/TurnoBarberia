@@ -1,80 +1,112 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Página principal con contenido oculto</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f9f9f9;
-    }
-    #contenido-oculto {
-      display: none;
-      margin-top: 20px;
-      padding: 15px;
-      border: 1px solid #ccc;
-      background-color: #fff;
-    }
-    a {
-      color: blue;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    /* Estilos del catálogo */
-    .catalogo {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 30px;
-      padding: 20px;
-    }
-    .producto {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
-    }
-    .producto:hover { transform: scale(1.03); }
-    .producto img {
-      width: 100%;
-      border-radius: 8px;
-    }
-    .producto h3 {
-      margin: 10px 0 5px;
-      font-size: 1.2em;
-    }
-    .producto .precio {
-      font-weight: bold;
-      color: #28a745;
-      margin: 10px 0;
-    }
-    .producto input,
-    .producto select {
-      width: 100%;
-      padding: 8px;
-      margin: 6px 0;
-      font-size: 1em;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    .producto button {
-      width: 100%;
-      padding: 10px;
-      background: #28a745;
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .producto button:hover {
-      background: #218838;
-    }
-  </style>
+  
 </head>
 <body>
+<style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #111;
+      color: #fff;
+    }
+
+    header {
+      background-color: #000;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 4px solid #c59d5f;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 36px;
+      color: #c59d5f;
+      letter-spacing: 2px;
+    }
+
+    nav {
+      background-color: #1a1a1a;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #c59d5f;
+    }
+
+    .hero {
+      background: url('https://images.unsplash.com/photo-1573497019104-cb39bdb9791e') no-repeat center center/cover;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .hero h2 {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      font-size: 40px;
+      color: #fff;
+    }
+
+    .section {
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .section h3 {
+      font-size: 28px;
+      color: #c59d5f;
+      margin-bottom: 20px;
+    }
+
+    .services {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .service-card {
+      background-color: #222;
+      padding: 20px;
+      border-radius: 10px;
+      width: 250px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .service-card h4 {
+      color: #c59d5f;
+      margin-bottom: 10px;
+    }
+
+    .service-card p {
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 20px;
+      color: #888;
+      font-size: 14px;
+    }
+  </style>
 
   <h2>Formulario para Apartar Turno</h2>
 
