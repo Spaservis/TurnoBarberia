@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tienda Markeza</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+    header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; }
+    header img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+    h1 { margin: 0; }
+    .container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+    .product {
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        width: 250px;
+        text-align: center;
+    }
+    .product img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
+    .btn { padding: 8px 12px; margin-top: 5px; cursor: pointer; border: none; border-radius: 5px; }
+    .btn-add { background-color: green; color: white; }
+    .btn-admin { background-color: orange; color: white; }
+    .btn-duplicate { background-color: blue; color: white; margin-top: 5px; display: none; }
+    .btn-delete { background-color: red; color: white; margin-top: 5px; display: none; }
+    .btn-remove-selected { background-color: #555; color: white; margin-top: 10px; }
+    .file-input { display: none; margin-top: 5px; }
+    .cart { margin-top: 20px; background: white; padding: 15px; border-radius: 8px; }
+    .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
+</style>
+</head>
+<body>
+
+<header>
+    <img src="Markeza.jpg" alt="Logo Markeza">
+    <h1>🛍️ Tienda Markeza</h1>
+</header>
+
+<!-- Botón para activar/desactivar modo administrador -->
+<button class="btn btn-admin" id="adminLoginBtn">Entrar como Administrador</button>
+
+<div class="container" id="productContainer"></div>
+
+<div class="cart">
+    <h2>🛒 Carrito</h2>
+    <div id="cartItems"></div>
+    <p><strong>Total: $<span id="total">0</span></strong></p>
+    <input type="text" id="name" placeholder="Nombre" required>
+    <input type="text" id="address" placeholder="Dirección" required>
+    <input type="text" id="phone" placeholder="Teléfono" required>
+    <button class="btn btn-add" id="sendInvoice">Enviar factura por WhatsApp</button>
+    <button class="btn btn-remove-selected" id="removeSelected">🗑 Eliminar seleccionados</button>
+</div>
+
+<script>
+let adminMode = false;
+let total = 0;
+
+// Cargar productos guardados
+document.addEventListener("DOMContentLoaded", () => {
+    const savedProducts = JSON.parse(localStorage.getItem("products")) || [];
+    if (savedProducts.length === 0) {
+        savedProducts.push({ name: "Markeza pesado", price: 14000, img: "https://via.placeholder.com/250x150" });
+    }
+    savedProducts.forEach(product => crearProducto(product.name, product.price, product.img));
+});
+
+// Crear producto
+function crearProducto(name, price, img) {
+    const productDiv = document.createElement("div");
+    productDiv.classList.add("product");
+    productDiv.innerHTML = `
+        <img src="${img}">
+        <input type="file" class="file-input" accept="image/*">
+        <input type="text" class="product-name" value="${name}" readonly>
+        <input type="number" class="product-price" value="${price}" readonly>
+        <button class="btn btn-add">Agregar al carrito</button>
+        <button class="btn btn-duplicate">Duplicar producto</button>
+        <button class="btn btn-delete">Eliminar producto</button>
+    `;
+
+    const fileInput = productDiv.querySelector(".file-input");
+    fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                productDiv.querySelector("img").src = reader.result;
+                guardarProductos();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById("productContainer").appendChild(productDiv);
+}
+
+// Guardar productos
+function guardarProductos() {
+    const products = [];
+    document.querySelectorAll(".product").forEach(prod => {
+        products.push({
+            img: prod.querySelector("img").src,
+            name: prod.querySelector(".product-name").value,
+            price: prod.querySelector(".product-price").value
+        });
+    });
+    localStorage.setItem("products", JSON.stringify(products));
+}
+
+// Activar/desactivar modo administrador
+document.getElementById("adminLoginBtn").addEventListener("click", () => {
+    if (!adminMode) {
+        const password = prompt("Ingrese la contraseña de administrador:");
+        if (password === "produto") {
+            adminMode = true;
+            document.getElementById("adminLoginBtn").textContent = "Salir del modo Administrador";
+            activarModoAdmin();
+        } else {
+            alert("Contraseña incorrecta");
+        }
+    } else {
+        adminMode = false;
+        document.getElementById("adminLoginBtn").textContent = "Entrar como Administrador";
+        desactivarModoAdmin();
+    }
+});
+
+function activarModoAdmin() {
+    document.querySelectorAll(".product-name, .product-price").forEach(input => input.removeAttribute("readonly"));
+    document.querySelectorAll(".btn-duplicate, .btn-delete, .file-input").forEach(el => el.style.display = "block");
+}
+
+function desactivarModoAdmin() {
+    document.querySelectorAll(".product-name, .product-price").forEach(input => input.setAttribute("readonly", true));
+    document.querySelectorAll(".btn-duplicate, .btn-delete, .file-input").forEach(el => el.style.display = "none");
+}
+
+document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("btn-add")) {
+        const product = e.target.closest(".product");
+        const name = product.querySelector(".product-name").value;
+        const price = parseFloat(product.querySelector(".product-price").value);
+
+        const itemDiv = document.createElement("div");
+        itemDiv.classList.add("cart-item");
+        itemDiv.innerHTML = `
+            <input type="checkbox" class="select-item">
+            <span>${name} - $${price}</span>
+        `;
+        document.getElementById("cartItems").appendChild(itemDiv);
+
+        total += price;
+        document.getElementById("total").textContent = total;
+    }
+
+    if (e.target.classList.contains("btn-duplicate") && adminMode) {
+        const product = e.target.closest(".product");
+        const name = product.querySelector(".product-name").value;
+        const price = product.querySelector(".product-price").value;
+        const img = product.querySelector("img").src;
+        crearProducto(name, price, img);
+        guardarProductos();
+    }
+
+    if (e.target.classList.contains("btn-delete") && adminMode) {
+        e.target.closest(".product").remove();
+        guardarProductos();
+    }
+});
+
+document.getElementById("removeSelected").addEventListener("click", () => {
+    document.querySelectorAll(".select-item:checked").forEach(item => {
+        const priceText = item.nextElementSibling.textContent;
+        const price = parseFloat(priceText.split("$")[1]);
+        total -= price;
+        item.closest(".cart-item").remove();
+    });
+    document.getElementById("total").textContent = total;
+});
+
+document.getElementById("sendInvoice").addEventListener("click", () => {
+    const name = document.getElementById("name").value;
+    const address = document.getElementById("address").value;
+    const phone = document.getElementById("phone").value;
+
+    if (!name || !address || !phone) {
+        alert("Por favor, complete todos los datos");
+        return;
+    }
+
+    const items = Array.from(document.querySelectorAll("#cartItems .cart-item span"))
+        .map(span => span.textContent).join("\n");
+
+    const message = `Factura\nCliente: ${name}\nDirección: ${address}\nTeléfono: ${phone}\n\nProductos:\n${items}\n\nTotal: $${total}`;
+    const whatsappUrl = `https://wa.me/573001118739?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, "_blank");
+});
+</script>
+
+</body>
+</html>
